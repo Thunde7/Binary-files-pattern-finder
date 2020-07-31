@@ -7,8 +7,8 @@ class result():
         self.indent = indent
 
     def add(self,name,start,length,repeater=None):
-        item = {"range" : (start,start+length)} if not repeater else \
-                {"range" : (start,start+length), "repeating_byte" : repeater}
+        item = {"range" : f'({start},{start+length})',"length" : length} if not repeater else \
+                {"range" : f'({start},{start+length})', "length" : length, "repeating_byte" : repeater}
         if name not in self.dic:
             self.dic[name] = []
         self.dic[name].append(item)
@@ -18,19 +18,23 @@ class result():
             out.write(json.dumps(self.dic,indent=self.indent))
 
 
-def find_patterns(filename,dic,is_relative=False):
+def find_patterns(filename,dic,output,is_relative=False):
     if is_relative:
         filename = utils.get_cannon_path(filename)
     
     res = result()
 
-    windows, seperated_dic = utils.seperate_dic(dic)
+    key_lengths, dic_by_key_len = utils.seperate_dic_by_len(dic)
     
-    for i,byte in enumerate(utils.file_to_bytes_generator(filename)):
-        utils.update_windows(windows,byte)
-        for size in windows:
-            if windows[size] in seperated_dic[size]:
-                print("aha")
-                result.add(seperated_dic[size][windows[size]],i-size,size)
+    max_key_length = max(key_lengths)
+    min_key_length = min(key_lengths)
+    curr_buff = "00" * max_key_length
 
-    res.write_to_file("a.json")
+    for i,byte in enumerate(utils.file_to_bytes_generator(filename)):
+        curr_buff = utils.update_buffer(curr_buff,byte)
+        for length in key_lengths:
+            if curr_buff[:2*length] in dic_by_key_len[length]:
+                res.add(dic_by_key_len[length][curr_buff[:2*length]],
+                i-min_key_length-(length+1),length)
+
+    res.write_to_file(output)
