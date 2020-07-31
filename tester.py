@@ -3,6 +3,7 @@ import utils
 import random
 import os
 import json
+from fileAnalizer import FileAnalizer
 
 dic = { '5D00008000': 'lzma',
         '504B03040A' : 'coral_zip',
@@ -27,32 +28,35 @@ dic = { '5D00008000': 'lzma',
     '7F454C46': 'elf'
     }
 
+
+strip = lambda byte : byte[2:].upper() if len(byte) == 4 else "0" + byte[2:].upper()
+
 def gen_dict_from_file(input,output=None):
     res = {}
     gen = utils.file_to_bytes_generator(input)
     size = os.path.getsize(input)
-    for i,byte in enumerate(gen):
-        if i * 5 < size and random.randrange(0,100) > 97:
-            pat = "".join([strip(next(gen)) for _ in range(random.randrange(3,10))])
-            res[pat] = f"random_{i}"
+    i = 0
+    for byte in enumerate(gen):
+        if i * 1.5 < size and random.randrange(0,100) > 97:
+            pat_len = random.randrange(3,10) 
+            pat = "".join([strip(next(gen)) for _ in range(pat_len)])
+            res[pat] = f"random_that_started_at_{i}_with_len_{pat_len}"
+            i += pat_len
+        i += 1
     if output:
         with open(output,"w") as out:
             out.write(json.dumps(res,indet=2))
     return res
 
-strip = lambda byte : byte[2:] if len(byte) == 4 else "0" + byte[2:]
-
-def get_dict_from_json(input):
-    with open(input,"r") as inp:
-        dic = json.load(inp)
-    return dic
-
-def better_test(input,output):
+def random_test(input,repeating):
     dic = gen_dict_from_file(input)
-    main.find_patterns(input,dic,output)
+    pre_made_test(input,dic,repeating)
 
+def pre_made_test(input,dic,repeating):
+    fa = FileAnalizer(input)
+    fa.find_patterns_and_repeats(dic,repeating=repeating)
+    fa.write_results()
 
 if __name__ == "__main__":
-    #better_test("game.7z","game.json")
-    main.find_patterns("coral.zip",dic,"coral.json")
-    # better_test("coral.zip","coral.json")
+    random_test("game.7z",True)
+    random_test("coral.zip","coral.json")

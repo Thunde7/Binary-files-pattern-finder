@@ -10,3 +10,4 @@ Finding patterns in binary files
 
 # Done
 - work on window(finger-like) model
+- Added support for repeating bytes
