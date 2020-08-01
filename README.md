@@ -7,6 +7,7 @@ Finding patterns in binary files
 - write better tests
 - better var names
 - comments & docs
+- add multiprocess(?)
 
 # Done
 - work on window(finger-like) model

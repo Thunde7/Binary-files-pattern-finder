@@ -21,7 +21,7 @@ def file_to_bytes_generator(filename,chunksize=MB) -> Generator:
                 #yield from chunuk
             else: break
 
-def seperate_dic_by_len(dic) -> Tuple[dict,dict] :
+def seperate_dict_by_len(dic) -> Tuple[dict,dict] :
     ''' Creats a new dictionary by the keys length for easier search later on
     \n Args:
     \n\t dic (dict): the original dictionary
@@ -41,15 +41,15 @@ def seperate_dic_by_len(dic) -> Tuple[dict,dict] :
             patterns[length][key.upper()] = dic[key] #upper to match the hex string
     return patterns, regex
 
-def add_range(ranges,name,start,match):
+def add_range(ranges,name,start,end):
     if name in ranges:
         prev = ranges[name][-1]
         if prev["start"] < start and start <= prev["end"]:
-            prev["end"] = max(prev["end"],start+match.end()//2-1)
+            prev["end"] = max(prev["end"],start+end//2-1)
         else:
-            ranges[name].append({"start" : start,"end" : start+match.end()//2-1}) 
+            ranges[name].append({"start" : start,"end" : start+end//2-1}) 
     else:
-        ranges[name] = [{"start" : start,"end" : start+match.end()//2-1}]
+        ranges[name] = [{"start" : start,"end" : start+end//2-1}]
 
 
 def get_dict_from_json(input):

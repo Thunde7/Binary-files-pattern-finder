@@ -10,6 +10,7 @@ dic = { '5D00008000': 'lzma',
     '27051956': 'uImage',
     '18286F01': 'zImage',
     '1F8B0800': 'gzip',
+    '1F8B0808': 'gzip',
     '303730373031': 'cpio',
     '303730373032': 'cpio',
     '303730373033': 'cpio',
@@ -27,7 +28,8 @@ dic = { '5D00008000': 'lzma',
     'D00DFEED': 'fit',
     '7F454C46': 'elf',
     "[(0-9)(A-F)]{2,}" : "[(0-9)(A-F)]{2,}",
-    "00[A-F]*" : "shit"}
+    "([A-F]{2}){2,}":"Only letters",
+    "00([(A-F)(0-9)][(1-9)(A-F)])*" : "zero"}
 
 
 strip = lambda byte : byte[2:].upper() if len(byte) == 4 else "0" + byte[2:].upper()
@@ -53,17 +55,16 @@ def gen_dict_from_file(input,output=None):
 
 def random_test(input,repeating,chunksize=utils.MB):
     dic = gen_dict_from_file(input)
-    dic.update({"[(0-9)(A-F)]{2,} : [(0-9)(A-F)]{2,},00[A-F]*"})
     pre_made_test(input,dic,repeating)
 
 def pre_made_test(input,dic,repeating,chunksize=utils.MB):
     t0 = time.time()
     fa = FileAnalizer(input)
-    #fa.find_regex({"[(0-9)(A-F)]{2,} : [(0-9)(A-F)]{2,},00[A-F]*"})
     fa.find_patterns_and_repeats(dic,repeating=repeating,chunksize=chunksize)
     fa.write_results()
     print(time.time()-t0)
 
 if __name__ == "__main__":
-    #random_test("game.7z",False)
-    pre_made_test("coral.zip",dic,True,chunksize=1048576)
+    #random_test("game.7z",4)
+    #pre_made_test("game.7z",dic,4)
+    pre_made_test("coral.zip",dic,4,chunksize=1048576)
