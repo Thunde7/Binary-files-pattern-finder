@@ -1,8 +1,8 @@
-import main
 import utils
 import random
 import os
 import json
+import time
 from fileAnalizer import FileAnalizer
 
 dic = { '5D00008000': 'lzma',
@@ -25,8 +25,9 @@ dic = { '5D00008000': 'lzma',
     '51434454': 'dtb',
     '68737173': 'squashfs',
     'D00DFEED': 'fit',
-    '7F454C46': 'elf'
-    }
+    '7F454C46': 'elf',
+    "[(0-9)(A-F)]{2,}" : "[(0-9)(A-F)]{2,}",
+    "00[A-F]*" : "shit"}
 
 
 strip = lambda byte : byte[2:].upper() if len(byte) == 4 else "0" + byte[2:].upper()
@@ -36,27 +37,33 @@ def gen_dict_from_file(input,output=None):
     gen = utils.file_to_bytes_generator(input)
     size = os.path.getsize(input)
     i = 0
-    for byte in enumerate(gen):
-        if i * 1.5 < size and random.randrange(0,100) > 97:
-            pat_len = random.randrange(3,10) 
-            pat = "".join([strip(next(gen)) for _ in range(pat_len)])
-            res[pat] = f"random_that_started_at_{i}_with_len_{pat_len}"
-            i += pat_len
-        i += 1
+    for byte in gen:
+        if i * 5 < size:
+            if random.randrange(0,100) > 98:
+                pat_len = random.randrange(3,10) 
+                pat = "".join([strip(byte)] + [strip(next(gen)) for _ in range(pat_len)])
+                res[pat] = f"random_that_started_at_{i}_with_len_{pat_len+1}"
+                i += pat_len
+            i += 1 
+        else: break
     if output:
         with open(output,"w") as out:
             out.write(json.dumps(res,indet=2))
     return res
 
-def random_test(input,repeating):
+def random_test(input,repeating,chunksize=utils.MB):
     dic = gen_dict_from_file(input)
+    dic.update({"[(0-9)(A-F)]{2,} : [(0-9)(A-F)]{2,},00[A-F]*"})
     pre_made_test(input,dic,repeating)
 
-def pre_made_test(input,dic,repeating):
+def pre_made_test(input,dic,repeating,chunksize=utils.MB):
+    t0 = time.time()
     fa = FileAnalizer(input)
-    fa.find_patterns_and_repeats(dic,repeating=repeating)
+    #fa.find_regex({"[(0-9)(A-F)]{2,} : [(0-9)(A-F)]{2,},00[A-F]*"})
+    fa.find_patterns_and_repeats(dic,repeating=repeating,chunksize=chunksize)
     fa.write_results()
+    print(time.time()-t0)
 
 if __name__ == "__main__":
-    random_test("game.7z",True)
-    random_test("coral.zip","coral.json")
+    #random_test("game.7z",False)
+    pre_made_test("coral.zip",dic,True,chunksize=1048576)
