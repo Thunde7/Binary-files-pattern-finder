@@ -3,7 +3,6 @@
 Finding patterns in binary files
 
 # TODO
-- make it run wayyy faster (currenty 16sec per 1MB)
 - write better tests
 - better var names
 - comments & docs
@@ -13,3 +12,5 @@ Finding patterns in binary files
 - work on window(finger-like) model
 - Added support for repeating bytes
 - add support for regex
+- ditched window model
+- made it run wayyy faster (currenty 8-16 sec per 8MB (dpends on dict size))

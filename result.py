@@ -15,9 +15,8 @@ class Result():
 
     def add_from_dict(self,ranges):
         for name in ranges:
-            #self.dic[name] = [{"range" : x["range"], "length" : x["length"]} for x in ranges[name]]
-            for r in ranges[name]:
-                self.add(name,r["start"],r["end"]-r["start"]+1)
+            for start,length in ranges[name].items():
+                self.add(name,start,length)
 
 
     def write_to_file(self):

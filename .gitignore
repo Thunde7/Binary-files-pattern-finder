@@ -4,4 +4,6 @@
 *.json
 *.gz
 .vscode
+.archives
 __pycache__
+tmp.py
