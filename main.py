@@ -1,42 +1,39 @@
-import fileAnalizer
+import fileAnalyzer
+import utils
 import time
 import argparse
 
-dic = { '5D00008000': 'lzma',
-        '504B03040A' : 'coral_zip',
-    '27051956': 'uImage',
-    '18286F01': 'zImage',
-    '1F8B0800': 'gzip',
-    '1F8B0808': 'gzip',
-    '303730373031': 'cpio',
-    '303730373032': 'cpio',
-    '303730373033': 'cpio',
-    '894C5A4F000D0A1A0A': 'lzo',
-    '5D00000004': 'lzma',
-    'FD377A585A00': 'xz',
-    '314159265359': 'bzip2',
-    '425A6839314159265359': 'bzip2',
-    '04224D18': 'lz4',
-    '02214C18': 'lz4',
-    '1F9E08': 'gzip',
-    '71736873': 'squashfs',
-    '51434454': 'dtb',
-    '68737173': 'squashfs',
-    'D00DFEED': 'fit',
-    '7F454C46': 'elf',
-    "([0-9][A-F]){2,}" : "less then A0",
-    "([A-F]{2}){3,}" : "Only letters",
-    "([0-9]{2}){3,}" : "Only numbers",
-    "([A-F][0-9])([0-9][A-F])([A-F]{4})": "sigs",
-    }#"00+" : "zeros"}
+
+def parse_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "filepath", help="the name of the file to be parsed", default=None)
+    ap.add_argument(
+        "dictpath", help="the path to the pattern/regex dictionary,default is dict.json", default=None)
+    ap.add_argument(
+        "min_repeats", help="the minimum amout of bytes repeats to log to the json file, default is 0", default="0")
+    ap.add_argument(
+        "--readsize", help="the amout of bytes to be read from the file, default is the whole file", default="0")
+    ap.add_argument(
+        "--chunksize", help="the amount of bytes read at a time, default is 2MB, do not exceed 1GB", default=4*utils.MB)
+    ap.add_argument(
+        "--time", help="messures and prints the time the tool took", default=False)
+    return ap.parse_args()
 
 
 def main():
-    t0 = time.time()
-    fa = fileAnalizer.FileAnalizer("coral.zip")
-    fa.find_patterns(dic,repeating=4)
+    args = parse_args()
+    if not (args.filepath and args.dictpath):
+        raise(ValueError("you need to specify the filepath and dictpath"))
+    fa = fileAnalyzer.FileAnalyzer(args.filepath, chunksize=args.chunksize)
+    pat_dict = utils.get_dict_from_json(args.dictpath)
+    if args.time:
+        t0 = time.time()
+    fa.find_patterns(pat_dict, upto_offset=args.readsize,
+                     repeating=args.min_repeats)
     fa.write_results()
-    print(time.time() - t0)
+    if args.time:
+        print(f"the run took {time.time() - t0} seconds")
 
 
 if __name__ == "__main__":
