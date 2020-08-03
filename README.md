@@ -1,4 +1,4 @@
-# Arcus_assignment
+# Binary files pattern finder
 
 Finding patterns in binary files
 
@@ -32,8 +32,7 @@ default is False
 
 #### From a script:
 
-`
-  >>> import patternFinder  
-
-  >>> patternFinder.find_patterns(...) #same args as before, except pattern dict which should not be a path to a json file!
+`  
+>>> import patternFinder  
+>>> patternFinder.find_patterns(...) #same args as before, except pattern dict which should not be a path to a json file!
 `
